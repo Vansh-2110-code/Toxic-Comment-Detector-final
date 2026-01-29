@@ -6,9 +6,7 @@
 // ===========================
 // Configuration
 // ===========================
-const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
-    ? 'http://localhost:5000'
-    : window.location.origin;
+const API_BASE_URL = '';
 
 // DOM Elements
 const commentInput = document.getElementById('commentInput');
@@ -343,10 +341,10 @@ function hideResults() {
  */
 async function checkAPIHealth() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/predict`);
+        const response = await fetch(`${API_BASE_URL}/api/stats`);
         const data = await response.json();
 
-        if (data.status === 'online') {
+        if (data.model_loaded !== undefined) {
             console.log('✅ Backend API is online');
             console.log('📊 Model loaded:', data.model_loaded);
             return true;

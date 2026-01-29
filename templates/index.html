@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toxic Comments Classifier - AI-Powered Content Moderation</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <!-- Header Section -->
     <header class="header">
@@ -73,11 +75,9 @@
                     <h3>Analyze Comment</h3>
                 </div>
                 <div class="card-body">
-                    <textarea 
-                        id="commentInput" 
+                    <textarea id="commentInput"
                         placeholder="Enter a comment to analyze its toxicity level...&#10;&#10;Example: 'This is a great discussion!' or 'You are completely wrong and stupid!'"
-                        rows="6"
-                    ></textarea>
+                        rows="6"></textarea>
                     <div class="input-info">
                         <span class="char-count">
                             <span id="charCount">0</span> characters
@@ -92,7 +92,8 @@
                         <button class="sample-btn" data-sample="This is an excellent article! Thank you for sharing.">
                             Safe Comment
                         </button>
-                        <button class="sample-btn" data-sample="You are an idiot and you don't know what you're talking about!">
+                        <button class="sample-btn"
+                            data-sample="You are an idiot and you don't know what you're talking about!">
                             Toxic
                         </button>
                         <button class="sample-btn" data-sample="I hope you die for posting this garbage.">
@@ -302,6 +303,7 @@
     </footer>
 
     <!-- JavaScript -->
-    <script src="script.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
+
 </html>

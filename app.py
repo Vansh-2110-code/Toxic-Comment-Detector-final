@@ -3,7 +3,7 @@ Toxic Comments Classification API
 Main Flask application for serving the toxic comment classifier model
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import numpy as np
 import pickle
@@ -12,7 +12,7 @@ import re
 from datetime import datetime
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)  # Enable Cross-Origin Resource Sharing for frontend communication
 
 # Global variables for model and vectorizer
@@ -42,6 +42,7 @@ def load_models():
     global model, vectorizer
     
     try:
+        print(f"Loading models from: {MODEL_PATH}")
         # Check if model files exist
         if os.path.exists(MODEL_PATH) and os.path.exists(VECTORIZER_PATH):
             with open(MODEL_PATH, 'rb') as f:
@@ -200,15 +201,9 @@ def predict_toxicity(text):
 @app.route('/')
 def home():
     """
-    Health check endpoint
+    Serve the frontend
     """
-    return jsonify({
-        'status': 'online',
-        'service': 'Toxic Comments Classification API',
-        'version': '1.0.0',
-        'model_loaded': model is not None,
-        'timestamp': datetime.now().isoformat()
-    })
+    return render_template('index.html')
 
 
 @app.route('/api/predict', methods=['POST'])
