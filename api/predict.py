@@ -24,55 +24,23 @@ def load_models():
     """Load the pre-trained model and vectorizer from disk"""
     global model, vectorizer
     
-    # In Vercel environment, files are located relative to the function root
-    # The models should be available in the deployed package
-    model_paths = [
-        './backend/models/toxic_classifier.pkl',
-        '../backend/models/toxic_classifier.pkl',
-        '../../backend/models/toxic_classifier.pkl',
-        './models/toxic_classifier.pkl',
-        '../models/toxic_classifier.pkl',
-        'models/toxic_classifier.pkl'
-    ]
-    
-    vectorizer_paths = [
-        './backend/models/vectorizer.pkl',
-        '../backend/models/vectorizer.pkl',
-        '../../backend/models/vectorizer.pkl',
-        './models/vectorizer.pkl',
-        '../models/vectorizer.pkl',
-        'models/vectorizer.pkl'
-    ]
-
+    # Updated logic for Vercel: look in local directory relative to script
     try:
-        model_path = None
-        vectorizer_path = None
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        model_path = os.path.join(base_dir, 'models', 'toxic_classifier.pkl')
+        vectorizer_path = os.path.join(base_dir, 'models', 'vectorizer.pkl')
         
-        # Find the correct model path
-        for path in model_paths:
-            if os.path.exists(path):
-                model_path = path
-                break
-                
-        # Find the correct vectorizer path
-        for path in vectorizer_paths:
-            if os.path.exists(path):
-                vectorizer_path = path
-                break
+        print(f"Looking for models in: {base_dir}")
+        print(f"Model path: {model_path}")
 
-        if model_path and vectorizer_path:
-            print(f"Loading model from: {model_path}")
-            print(f"Loading vectorizer from: {vectorizer_path}")
-            
+        if os.path.exists(model_path) and os.path.exists(vectorizer_path):
             with open(model_path, 'rb') as f:
                 model = pickle.load(f)
             with open(vectorizer_path, 'rb') as f:
                 vectorizer = pickle.load(f)
             print("Models loaded successfully!")
         else:
-            print("Model files not found, using demo mode")
-            print(f"Tried model paths: {model_paths}")
-            print(f"Tried vectorizer paths: {vectorizer_paths}")
+            print(f"Model files not found at {model_path}")
             model = None
             vectorizer = None
     except Exception as e:
