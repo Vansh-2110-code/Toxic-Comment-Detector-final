@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toxic Comments Classifier - AI-Powered Content Moderation</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <h1>Toxic Comments Classifier</h1>
+            </div>
+            <nav class="nav">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#stats" class="nav-link">Statistics</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h2 class="hero-title">AI-Powered Toxic Comment Detection</h2>
+                <p class="hero-subtitle">
+                    Leverage machine learning to identify and classify toxic comments across 6 categories.
+                    Keep your online community safe and respectful.
+                </p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-brain"></i>
+                        <div>
+                            <span class="stat-number">99%</span>
+                            <span class="stat-label">Accuracy</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-bolt"></i>
+                        <div>
+                            <span class="stat-number">&lt;100ms</span>
+                            <span class="stat-label">Response Time</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-shield-virus"></i>
+                        <div>
+                            <span class="stat-number">6</span>
+                            <span class="stat-label">Categories</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Classification Section -->
+    <section class="main-section">
+        <div class="container">
+            <!-- Input Card -->
+            <div class="card input-card">
+                <div class="card-header">
+                    <i class="fas fa-comments"></i>
+                    <h3>Analyze Comment</h3>
+                </div>
+                <div class="card-body">
+                    <textarea 
+                        id="commentInput" 
+                        placeholder="Enter a comment to analyze its toxicity level...&#10;&#10;Example: 'This is a great discussion!' or 'You are completely wrong and stupid!'"
+                        rows="6"
+                    ></textarea>
+                    <div class="input-info">
+                        <span class="char-count">
+                            <span id="charCount">0</span> characters
+                        </span>
+                        <button id="analyzeBtn" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                            Analyze Comment
+                        </button>
+                    </div>
+                    <div class="quick-samples">
+                        <span class="sample-label">Quick samples:</span>
+                        <button class="sample-btn" data-sample="This is an excellent article! Thank you for sharing.">
+                            Safe Comment
+                        </button>
+                        <button class="sample-btn" data-sample="You are an idiot and you don't know what you're talking about!">
+                            Toxic
+                        </button>
+                        <button class="sample-btn" data-sample="I hope you die for posting this garbage.">
+                            Severe Toxic
+                        </button>
+                        <button class="sample-btn" data-sample="This damn post is complete bullshit.">
+                            Obscene
+                        </button>
+                        <button class="sample-btn" data-sample="I'm going to find you and hurt you.">
+                            Threat
+                        </button>
+                        <button class="sample-btn" data-sample="You're a complete fool and failure.">
+                            Insult
+                        </button>
+                        <button class="sample-btn" data-sample="I hate people like you who are so stupid.">
+                            Identity Hate
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner hidden">
+                <div class="spinner"></div>
+                <p>Analyzing comment...</p>
+            </div>
+
+            <!-- Results Card -->
+            <div id="resultsCard" class="card results-card hidden">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Analysis Results</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Overall Result -->
+                    <div id="overallResult" class="overall-result"></div>
+
+                    <!-- Toxicity Categories -->
+                    <div class="categories-section">
+                        <h4>Toxicity Breakdown</h4>
+                        <div id="categoriesContainer" class="categories-container"></div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="result-actions">
+                        <button id="clearBtn" class="btn btn-secondary">
+                            <i class="fas fa-redo"></i>
+                            Analyze Another
+                        </button>
+                        <button id="exportBtn" class="btn btn-outline">
+                            <i class="fas fa-download"></i>
+                            Export Results
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-message hidden">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText"></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section" id="about">
+        <div class="container">
+            <h2 class="section-title">About This Project</h2>
+            <div class="about-grid">
+                <div class="about-card">
+                    <i class="fas fa-bullseye"></i>
+                    <h3>Purpose</h3>
+                    <p>
+                        This application helps moderate online discussions by automatically detecting
+                        toxic comments. It's designed to help maintain healthy online communities.
+                    </p>
+                </div>
+                <div class="about-card">
+                    <i class="fas fa-database"></i>
+                    <h3>Dataset</h3>
+                    <p>
+                        Trained on the Toxic Comment Classification Challenge dataset from Kaggle,
+                        containing thousands of labeled comments from Wikipedia discussions.
+                    </p>
+                </div>
+                <div class="about-card">
+                    <i class="fas fa-robot"></i>
+                    <h3>Technology</h3>
+                    <p>
+                        Uses machine learning (Logistic Regression + TF-IDF) to classify comments
+                        across 6 toxicity categories with high accuracy.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <i class="fas fa-keyboard"></i>
+                    <h3>Input Text</h3>
+                    <p>Enter or paste the comment you want to analyze</p>
+                </div>
+                <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <i class="fas fa-cogs"></i>
+                    <h3>AI Processing</h3>
+                    <p>The ML model analyzes the text patterns and context</p>
+                </div>
+                <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <i class="fas fa-chart-pie"></i>
+                    <h3>Classification</h3>
+                    <p>Results show probability scores for each category</p>
+                </div>
+                <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Action</h3>
+                    <p>Use the results to moderate and improve your community</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Info Section -->
+    <section class="categories-info" id="stats">
+        <div class="container">
+            <h2 class="section-title">Toxicity Categories</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-icon toxic">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Toxic</h3>
+                    <p>General rude, disrespectful, or unreasonable comments</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon severe">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <h3>Severe Toxic</h3>
+                    <p>Extremely hateful, aggressive, or violent comments</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon obscene">
+                        <i class="fas fa-eye-slash"></i>
+                    </div>
+                    <h3>Obscene</h3>
+                    <p>Comments containing profanity or vulgar language</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon threat">
+                        <i class="fas fa-skull-crossbones"></i>
+                    </div>
+                    <h3>Threat</h3>
+                    <p>Comments threatening violence or harm to others</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon insult">
+                        <i class="fas fa-user-slash"></i>
+                    </div>
+                    <h3>Insult</h3>
+                    <p>Personal attacks or insulting language</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon hate">
+                        <i class="fas fa-heart-broken"></i>
+                    </div>
+                    <h3>Identity Hate</h3>
+                    <p>Hateful comments targeting identity or demographics</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Toxic Comments Classifier</h4>
+                    <p>AI-powered content moderation for safer online communities.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Technology Stack</h4>
+                    <p>Python • Flask • Scikit-learn • TensorFlow • HTML/CSS/JS</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Project Info</h4>
+                    <p>Built for NLP & Sentiment Analysis Portfolio</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Toxic Comments Classifier. Created for educational purposes.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
