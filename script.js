@@ -6,8 +6,8 @@
 // ===========================
 // Configuration
 // ===========================
-const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') 
-    ? 'http://localhost:5000' 
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:')
+    ? 'http://localhost:5000'
     : window.location.origin;
 
 // DOM Elements
@@ -73,10 +73,10 @@ document.querySelectorAll('.nav-link').forEach(link => {
         e.preventDefault();
         const targetId = link.getAttribute('href');
         const targetSection = document.querySelector(targetId);
-        
+
         if (targetSection) {
             targetSection.scrollIntoView({ behavior: 'smooth' });
-            
+
             // Update active link
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             link.classList.add('active');
@@ -93,21 +93,21 @@ document.querySelectorAll('.nav-link').forEach(link => {
  */
 async function analyzeComment() {
     const text = commentInput.value.trim();
-    
+
     // Validate input
     if (!text) {
         showError('Please enter a comment to analyze.');
         return;
     }
-    
+
     // Hide previous results and errors
     hideResults();
     hideError();
-    
+
     // Show loading spinner
     loadingSpinner.classList.remove('hidden');
     analyzeBtn.disabled = true;
-    
+
     try {
         // Make API request
         const response = await fetch(`${API_BASE_URL}/api/predict`, {
@@ -117,25 +117,25 @@ async function analyzeComment() {
             },
             body: JSON.stringify({ text: text })
         });
-        
+
         // Check if response is ok
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         // Check if request was successful
         if (!data.success) {
             throw new Error(data.error || 'An unknown error occurred');
         }
-        
+
         // Store results for export
         currentResults = data;
-        
+
         // Display results
         displayResults(data);
-        
+
     } catch (error) {
         console.error('Error analyzing comment:', error);
         showError(`Failed to analyze comment: ${error.message}. Make sure the backend server is running on ${API_BASE_URL}`);
@@ -152,16 +152,16 @@ async function analyzeComment() {
  */
 function displayResults(data) {
     const { predictions, is_toxic, max_toxicity, toxicity_level, demo_mode } = data;
-    
+
     // Show results card
     resultsCard.classList.remove('hidden');
-    
+
     // Scroll to results
     resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    
+
     // Display overall result
     displayOverallResult(is_toxic, toxicity_level, max_toxicity, demo_mode);
-    
+
     // Display category breakdown
     displayCategories(predictions);
 }
@@ -176,7 +176,7 @@ function displayResults(data) {
 function displayOverallResult(isToxic, level, score, demoMode) {
     // Determine result class and icon
     let resultClass, icon, title, description;
-    
+
     if (level === 'Safe') {
         resultClass = 'safe';
         icon = '✅';
@@ -198,11 +198,11 @@ function displayOverallResult(isToxic, level, score, demoMode) {
         title = 'Highly Toxic Comment';
         description = 'This comment contains severely offensive or harmful content.';
     }
-    
+
     // Build HTML
-    const demoNotice = demoMode ? 
+    const demoNotice = demoMode ?
         '<p style="margin-top: 1rem; font-size: 0.875rem; opacity: 0.7;">⚡ Demo Mode: Using keyword-based detection. Run train_model.py for full ML model.</p>' : '';
-    
+
     overallResult.className = `overall-result ${resultClass}`;
     overallResult.innerHTML = `
         <div class="result-icon">${icon}</div>
@@ -229,21 +229,21 @@ function displayCategories(predictions) {
         'insult': '#3b82f6',
         'identity_hate': '#ec4899'
     };
-    
+
     // Clear existing content
     categoriesContainer.innerHTML = '';
-    
+
     // Create category items
     Object.entries(predictions).forEach(([category, score]) => {
         const percentage = (score * 100).toFixed(1);
         const color = categoryColors[category] || '#6366f1';
-        
+
         // Format category name (replace underscores with spaces and capitalize)
         const displayName = category
             .split('_')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
-        
+
         const categoryItem = document.createElement('div');
         categoryItem.className = 'category-item';
         categoryItem.innerHTML = `
@@ -255,7 +255,7 @@ function displayCategories(predictions) {
                 <div class="category-fill" style="width: ${percentage}%; background: ${color};"></div>
             </div>
         `;
-        
+
         categoriesContainer.appendChild(categoryItem);
     });
 }
@@ -270,7 +270,7 @@ function resetForm() {
     hideError();
     currentResults = null;
     commentInput.focus();
-    
+
     // Scroll to input
     document.querySelector('.input-card').scrollIntoView({ behavior: 'smooth' });
 }
@@ -283,25 +283,25 @@ function exportResults() {
         showError('No results to export.');
         return;
     }
-    
+
     // Create JSON blob
     const dataStr = JSON.stringify(currentResults, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
-    
+
     // Create download link
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    
+
     // Generate filename with timestamp
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     link.download = `toxic-analysis-${timestamp}.json`;
-    
+
     // Trigger download
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     // Clean up
     URL.revokeObjectURL(url);
 }
@@ -313,7 +313,7 @@ function exportResults() {
 function showError(message) {
     errorText.textContent = message;
     errorMessage.classList.remove('hidden');
-    
+
     // Auto-hide after 5 seconds
     setTimeout(() => {
         hideError();
@@ -343,9 +343,9 @@ function hideResults() {
  */
 async function checkAPIHealth() {
     try {
-        const response = await fetch(`${API_BASE_URL}/`);
+        const response = await fetch(`${API_BASE_URL}/api/predict`);
         const data = await response.json();
-        
+
         if (data.status === 'online') {
             console.log('✅ Backend API is online');
             console.log('📊 Model loaded:', data.model_loaded);
@@ -367,13 +367,13 @@ async function checkAPIHealth() {
  */
 function init() {
     console.log('🚀 Toxic Comments Classifier - Frontend initialized');
-    
+
     // Check API health on load
     checkAPIHealth();
-    
+
     // Focus on input
     commentInput.focus();
-    
+
     // Add intersection observer for scroll animations
     addScrollAnimations();
 }
@@ -386,7 +386,7 @@ function addScrollAnimations() {
         threshold: 0.1,
         rootMargin: '0px 0px -100px 0px'
     };
-    
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -395,7 +395,7 @@ function addScrollAnimations() {
             }
         });
     }, observerOptions);
-    
+
     // Observe cards and sections
     document.querySelectorAll('.card, .about-card, .info-card, .step').forEach(el => {
         el.style.opacity = '0';

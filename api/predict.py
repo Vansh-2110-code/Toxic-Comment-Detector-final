@@ -24,25 +24,55 @@ def load_models():
     """Load the pre-trained model and vectorizer from disk"""
     global model, vectorizer
     
-    # In Vercel environment, models are typically stored differently
-    # For now, we'll try to load from the expected location
-    model_path = './backend/models/toxic_classifier.pkl'
-    vectorizer_path = './backend/models/vectorizer.pkl'
+    # In Vercel environment, files are located relative to the function root
+    # The models should be available in the deployed package
+    model_paths = [
+        './backend/models/toxic_classifier.pkl',
+        '../backend/models/toxic_classifier.pkl',
+        '../../backend/models/toxic_classifier.pkl',
+        './models/toxic_classifier.pkl',
+        '../models/toxic_classifier.pkl',
+        'models/toxic_classifier.pkl'
+    ]
     
-    # Also try relative to this file
-    if not os.path.exists(model_path):
-        model_path = '../backend/models/toxic_classifier.pkl'
-    if not os.path.exists(vectorizer_path):
-        vectorizer_path = '../backend/models/vectorizer.pkl'
+    vectorizer_paths = [
+        './backend/models/vectorizer.pkl',
+        '../backend/models/vectorizer.pkl',
+        '../../backend/models/vectorizer.pkl',
+        './models/vectorizer.pkl',
+        '../models/vectorizer.pkl',
+        'models/vectorizer.pkl'
+    ]
 
     try:
-        if os.path.exists(model_path) and os.path.exists(vectorizer_path):
+        model_path = None
+        vectorizer_path = None
+        
+        # Find the correct model path
+        for path in model_paths:
+            if os.path.exists(path):
+                model_path = path
+                break
+                
+        # Find the correct vectorizer path
+        for path in vectorizer_paths:
+            if os.path.exists(path):
+                vectorizer_path = path
+                break
+
+        if model_path and vectorizer_path:
+            print(f"Loading model from: {model_path}")
+            print(f"Loading vectorizer from: {vectorizer_path}")
+            
             with open(model_path, 'rb') as f:
                 model = pickle.load(f)
             with open(vectorizer_path, 'rb') as f:
                 vectorizer = pickle.load(f)
+            print("Models loaded successfully!")
         else:
-            # Fallback to None, will use demo mode
+            print("Model files not found, using demo mode")
+            print(f"Tried model paths: {model_paths}")
+            print(f"Tried vectorizer paths: {vectorizer_paths}")
             model = None
             vectorizer = None
     except Exception as e:
@@ -188,8 +218,12 @@ def handler(event, context):
     """Vercel/Serverless function handler"""
     global model, vectorizer
     
+    # Log incoming request for debugging
+    print(f"Received request: {event.get('httpMethod')} {event.get('path')}")
+    
     # Load models if not already loaded
-    if model is None and vectorizer is None:
+    if model is None or vectorizer is None:
+        print("Loading models...")
         load_models()
     
     # Get the HTTP method
@@ -220,6 +254,7 @@ def handler(event, context):
                 'service': 'Toxic Comments Classification API',
                 'version': '1.0.0',
                 'model_loaded': model is not None,
+                'message': 'API is running' if model is not None else 'API is running in demo mode',
                 'timestamp': datetime.now().isoformat()
             })
         }
@@ -228,7 +263,38 @@ def handler(event, context):
     if http_method == 'POST':
         try:
             # Parse the request body
-            body = json.loads(event.get('body', '{}'))
+            request_body = event.get('body')
+            if request_body is None:
+                return {
+                    'statusCode': 400,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    'body': json.dumps({
+                        'success': False,
+                        'error': 'Request body is missing.'
+                    })
+                }
+            
+            # Handle both string and already-parsed JSON bodies
+            if isinstance(request_body, str):
+                try:
+                    body = json.loads(request_body)
+                except json.JSONDecodeError:
+                    return {
+                        'statusCode': 400,
+                        'headers': {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
+                        'body': json.dumps({
+                            'success': False,
+                            'error': 'Invalid JSON in request body'
+                        })
+                    }
+            else:
+                body = request_body
             
             # Validate input
             if 'text' not in body:
@@ -288,19 +354,8 @@ def handler(event, context):
                 'body': json.dumps(response)
             }
             
-        except json.JSONDecodeError:
-            return {
-                'statusCode': 400,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps({
-                    'success': False,
-                    'error': 'Invalid JSON in request body'
-                })
-            }
         except Exception as e:
+            print(f"Error processing request: {str(e)}")
             return {
                 'statusCode': 500,
                 'headers': {
